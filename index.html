@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5">
+    <title>MFUMO WA CLINIKI · DR. WILLIAM</title>
+    
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Cinzel:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Libraries (QR, canvas, PDF) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --gold: #D4AF37;
+            --gold-light: #f5e3a9;
+            --dark: #0a0f1a;
+            --dark-panel: rgba(15, 20, 30, 0.95);
+            --light: #f0f4f8;
+            --red: #e74c3c;
+            --green: #2ecc71;
+            --blue: #3498db;
+            --gray: #2c3e50;
+            --border-radius: 14px;
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--dark);
+            color: #eee;
+            background-image: linear-gradient(145deg, rgba(10,15,26,0.97), rgba(10,15,26,0.95)), url('https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=1453&auto=format&fit=crop');
+            background-size: cover;
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+
+        /* ---------- LOGIN SCREEN ---------- */
+        #login-screen {
+            position: fixed; inset: 0; z-index: 9999;
+            background: radial-gradient(circle at 30% 30%, #1a1f2e, #000);
+            display: flex; justify-content: center; align-items: center;
+            backdrop-filter: blur(5px);
+        }
+        .login-card {
+            background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(12px);
+            padding: 2.8rem 2rem;
+            border: 2px solid var(--gold);
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 420px;
+            text-align: center;
+            box-shadow: 0 25px 50px -8px rgba(212,175,55,0.25);
+            animation: floatIn 0.5s ease-out;
+        }
+        @keyframes floatIn {
+            0% { opacity: 0; transform: translateY(25px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        .login-card i { font-size: 4rem; color: var(--gold); margin-bottom: 0.8rem; }
+        .login-card h2 { font-family: 'Cinzel', serif; color: var(--gold); letter-spacing: 1px; }
+        .login-card .sub { color: #aaa; margin-bottom: 2rem; font-size: 0.95rem; }
+
+        .pass-input {
+            background: #1e2533;
+            border: 2px solid #3a4050;
+            padding: 1rem 1.2rem;
+            font-size: 1.2rem;
+            letter-spacing: 6px;
+            text-align: center;
+            color: #fff;
+            border-radius: 50px;
+            width: 100%;
+            outline: none;
+            transition: 0.2s;
+            margin-bottom: 1.5rem;
+        }
+        .pass-input:focus { border-color: var(--gold); box-shadow: 0 0 15px #ffd96655; }
+
+        /* ---------- BUTTONS ---------- */
+        .btn {
+            border: none; padding: 0.8rem 1.8rem; border-radius: 40px; font-weight: 600;
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            cursor: pointer; transition: all 0.2s ease; font-size: 1rem;
+            border: 1px solid transparent;
+        }
+        .btn-gold {
+            background: linear-gradient(145deg, #b8860b, #e6c200);
+            color: #111; font-weight: 700; box-shadow: 0 8px 18px -6px #d4af37;
+        }
+        .btn-gold:hover { background: #f5d742; transform: scale(1.02); box-shadow: 0 12px 22px -8px #f1c40f; }
+        .btn-red { background: var(--red); color: white; }
+        .btn-red:hover { background: #c0392b; transform: scale(1.02); }
+        .btn-blue { background: var(--blue); color: white; }
+        .btn-blue:hover { background: #2980b9; transform: scale(1.02); }
+        .btn-green { background: var(--green); color: white; }  /* now defined */
+        .btn-green:hover { background: #27ae60; transform: scale(1.02); }
+        .btn-outline-gold {
+            background: transparent; border: 1.5px solid var(--gold); color: var(--gold);
+        }
+        .btn-outline-gold:hover { background: var(--gold); color: #000; }
+
+        /* ---------- DASHBOARD ---------- */
+        #dashboard { display: none; max-width: 1400px; margin: 0 auto; padding: 20px; }
+
+        .navbar {
+            display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;
+            background: rgba(0,0,0,0.4); backdrop-filter: blur(10px);
+            padding: 0.8rem 2rem; border-radius: 60px; margin-bottom: 30px;
+            border: 1px solid #3f3f5e; box-shadow: 0 8px 18px rgba(0,0,0,0.6);
+        }
+        .logo { font-family: 'Cinzel', serif; font-size: 1.7rem; color: var(--gold); letter-spacing: 1.5px; }
+        .nav-links { display: flex; gap: 12px; flex-wrap: wrap; }
+        .nav-link {
+            background: transparent; border: 1px solid #555; color: #ccc; padding: 8px 22px;
+            border-radius: 40px; font-weight: 500; transition: 0.2s; cursor: pointer;
+        }
+        .nav-link.active { background: var(--gold); color: #0a0f1a; border-color: var(--gold); font-weight: 700; }
+        .nav-link:hover:not(.active) { border-color: var(--gold); color: var(--gold); }
+
+        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 28px; }
+
+        /* cards / panels */
+        .glass-panel {
+            background: var(--dark-panel);
+            backdrop-filter: blur(12px);
+            border: 1px solid #2f354a;
+            border-radius: 24px;
+            padding: 1.8rem 1.5rem;
+            box-shadow: 0 20px 35px -8px black;
+            transition: all 0.2s;
+        }
+        .glass-panel h3 {
+            color: var(--gold); font-weight: 600; font-size: 1.3rem;
+            border-left: 6px solid var(--gold); padding-left: 15px; margin-bottom: 1.5rem;
+        }
+
+        /* form controls */
+        .input-group { margin-bottom: 1.2rem; }
+        .input-group label { display: block; font-size: 0.85rem; color: #bbb; margin-bottom: 5px; }
+        .input-field {
+            width: 100%; background: #1e2533; border: 1px solid #3c4357; color: white;
+            padding: 12px 18px; border-radius: 40px; outline: none; transition: 0.15s;
+        }
+        .input-field:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(212,175,55,0.2); }
+
+        .row-flex { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+
+        /* cart table */
+        .mini-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        .mini-table th { color: var(--gold); text-align: left; padding: 8px 0; border-bottom: 1px solid #444; }
+        .mini-table td { padding: 12px 0; border-bottom: 1px solid #2a2f40; }
+        .mini-table .price-col { text-align: right; }
+        .delete-icon { color: var(--red); cursor: pointer; font-size: 1.1rem; transition: 0.1s; }
+        .delete-icon:hover { transform: scale(1.2); }
+
+        /* receipt preview */
+        #receipt-preview {
+            background: white; color: black; padding: 35px 25px; font-family: 'Courier New', monospace;
+            max-width: 480px; margin: 0 auto; border-radius: 16px; box-shadow: 0 12px 35px rgba(212,175,55,0.3);
+            border: 2px solid var(--gold);
+        }
+        .rec-header { text-align: center; border-bottom: 2px dashed #222; padding-bottom: 12px; margin-bottom: 18px; }
+        .rec-logo { width: 75px; height: 75px; object-fit: contain; filter: drop-shadow(2px 4px 4px rgba(0,0,0,0.2)); }
+        .rec-meta { display: flex; justify-content: space-between; font-size: 0.85rem; margin: 12px 0; }
+        .rec-total { text-align: right; font-weight: 800; font-size: 1.3rem; border-top: 2px solid; border-bottom: 2px solid; padding: 10px 0; margin: 15px 0; }
+
+        .badge-low { background: rgba(231,76,60,0.25); color: #ff8a7a; padding: 2px 8px; border-radius: 30px; font-size: 0.7rem; font-weight: 600; }
+        .badge-ok { background: rgba(46,204,113,0.2); color: #86e69d; }
+
+        .stat-cards {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 18px; margin-bottom: 30px;
+        }
+        .stat-card {
+            background: #1b212f; border-radius: 24px; padding: 1.2rem; text-align: center; border-bottom: 4px solid var(--gold);
+        }
+
+        .data-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        .data-table th { text-align: left; color: var(--gold); padding: 8px 0; }
+        .data-table td { padding: 8px 0; border-bottom: 1px solid #2b3245; }
+
+        .action-icon { cursor: pointer; margin: 0 4px; color: #aaa; transition: 0.1s; }
+        .action-icon:hover { color: var(--gold); }
+
+        @media (max-width: 600px) {
+            .navbar { border-radius: 20px; padding: 15px; flex-direction: column; gap: 12px; }
+            .grid-2 { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- LOGIN MODAL -->
+<div id="login-screen">
+    <div class="login-card">
+        <i class="fas fa-clinic-medical"></i>
+        <h2>DR. WILLIAM</h2>
+        <div class="sub">mfumo wa ndani · namba ya siri</div>
+        <input type="password" id="passcode" class="pass-input" placeholder="****" maxlength="10" autofocus>
+        <button class="btn btn-gold" onclick="login()" style="width:100%; padding:1rem;"> <i class="fas fa-key"></i> INGIA</button>
+        <p id="login-error" style="color: #e74c3c; margin-top: 15px; display: none;">Namba si sahihi! Jaribu W004</p>
+    </div>
+</div>
+
+<!-- MAIN DASHBOARD -->
+<div id="dashboard">
+    <div class="navbar">
+        <span class="logo"><i class="fas fa-leaf" style="margin-right: 8px;"></i> DR. WILLIAM SYSTEM</span>
+        <div class="nav-links">
+            <button class="nav-link active" id="tab-billing-btn" onclick="switchTab('billing')">Risiti & Malipo</button>
+            <button class="nav-link" id="tab-admin-btn" onclick="switchTab('admin')">Admin · Stock</button>
+            <button class="nav-link" onclick="logout()" style="border-color: #922; color:#e67e7e;"><i class="fas fa-sign-out-alt"></i> Toka</button>
+        </div>
+    </div>
+
+    <!-- BILLING VIEW (risiti) -->
+    <div id="view-billing">
+        <div class="grid-2">
+            <!-- LEFT: Kuingiza data -->
+            <div class="glass-panel">
+                <h3><i class="fas fa-pen-alt" style="margin-right: 10px;"></i> Tengeneza Risiti</h3>
+                <div class="input-group">
+                    <label>Jina la mteja <span style="color:var(--gold);">*</span></label>
+                    <input type="text" id="client-name" class="input-field" placeholder="mf. Halima Juma">
+                </div>
+                <div class="input-group">
+                    <label>Chagua dawa / huduma</label>
+                    <div class="row-flex">
+                        <select id="item-select" class="input-field" style="flex:3;"></select>
+                        <input type="number" id="item-qty" class="input-field" value="1" min="1" style="width:90px; text-align:center;">
+                        <button class="btn btn-gold" onclick="addToCart()" style="padding:0.8rem 1.5rem;"><i class="fas fa-cart-plus"></i> Ongeza</button>
+                    </div>
+                </div>
+                
+                <!-- Cart (orodha ya dawa) -->
+                <div style="background: #0f1420; border-radius: 24px; padding: 1rem; margin: 20px 0;">
+                    <table class="mini-table">
+                        <thead><tr><th>Bidhaa</th><th>Idadi</th><th>Jumla</th><th></th></tr></thead>
+                        <tbody id="cart-body"></tbody>
+                    </table>
+                    <div style="text-align:right; margin-top:10px;">
+                        <button class="btn btn-outline-gold" onclick="clearCart()" style="padding:5px 18px; font-size:0.8rem;"><i class="fas fa-trash-alt"></i> Futa orodha</button>
+                    </div>
+                </div>
+
+                <button class="btn btn-gold" onclick="generateReceipt()" style="width:100%; padding:1rem;"><i class="fas fa-file-invoice"></i> ONYESHA RISITI</button>
+            </div>
+
+            <!-- RIGHT: Hakiki risiti + vitendo -->
+            <div class="glass-panel" style="display: flex; flex-direction: column;">
+                <h3><i class="fas fa-qrcode"></i> Hakiki na Upakue</h3>
+                <div id="receipt-wrapper" style="background: transparent; padding: 5px;">
+                    <div id="receipt-preview">
+                        <div class="rec-header">
+                            <img src="https://cdn-icons-png.flaticon.com/512/3063/3063822.png" class="rec-logo" alt="logo">
+                            <div style="font-weight:900; font-size:1.4rem;">DR. WILLIAM CLINIC</div>
+                            <div style="font-size:0.8rem;">KITUNDA · DAR ES SALAAM</div>
+                            <div style="font-size:0.75rem;">+255 762 286 282 | info@drwilliam.com</div>
+                        </div>
+                        <div class="rec-meta">
+                            <span id="r-date">Tarehe: DD/MM/YYYY</span>
+                            <span id="r-no">Namba: #0000</span>
+                        </div>
+                        <div style="margin:10px 0 12px; font-size:0.95rem; border-left:3px solid gold; padding-left:8px;">
+                            <strong>Mteja:</strong> <span id="r-client">---</span>
+                        </div>
+                        <table class="rec-table" style="width:100%;">
+                            <thead><tr><th>Maelezo</th><th>Bei</th><th>Jumla</th></tr></thead>
+                            <tbody id="r-items"></tbody>
+                        </table>
+                        <div class="rec-total" id="r-total">TZS 0</div>
+                        <div id="qrcode" style="display:flex; justify-content:center; margin:15px 0;"></div>
+                        <div class="rec-footer" style="text-align:center; font-size:0.7rem; margin-top:10px;">Asante · Afya bora kila siku</div>
+                    </div>
+                </div>
+
+                <!-- Buttons for receipt actions -->
+                <div class="row-flex" style="justify-content: center; margin-top: 25px; gap: 12px; flex-wrap: wrap;">
+                    <button class="btn btn-green" onclick="downloadImage()"><i class="fas fa-camera"></i> Picha</button>
+                    <button class="btn btn-red" onclick="downloadPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
+                    <button class="btn btn-blue" onclick="saveToSystem()"><i class="fas fa-database"></i> Hifadhi mauzo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADMIN VIEW (stock & expenses) -->
+    <div id="view-admin" style="display: none;">
+        <!-- takwimu za juu -->
+        <div class="stat-cards">
+            <div class="stat-card"><span style="color:#aaa;">Mapato (sales)</span> <div style="font-size:2rem; color:#2ecc71;">TZS <span id="stat-income">0</span></div></div>
+            <div class="stat-card"><span style="color:#aaa;">Matumizi</span> <div style="font-size:2rem; color:#e74c3c;">TZS <span id="stat-expense">0</span></div></div>
+            <div class="stat-card"><span style="color:#aaa;">Salio</span> <div style="font-size:2rem; color:var(--gold);">TZS <span id="stat-balance">0</span></div></div>
+        </div>
+
+        <div class="grid-2">
+            <!-- Stock Management -->
+            <div class="glass-panel">
+                <h3><i class="fas fa-boxes"></i> Dawa na Stock</h3>
+                <div class="row-flex" style="margin-bottom:20px;">
+                    <input type="text" id="new-prod-name" class="input-field" placeholder="Jina la dawa" style="flex:2;">
+                    <input type="number" id="new-prod-price" class="input-field" placeholder="Bei" style="width:100px;">
+                    <input type="number" id="new-prod-qty" class="input-field" placeholder="Idadi" style="width:85px;">
+                    <button class="btn btn-gold" onclick="addProduct()"><i class="fas fa-plus"></i></button>
+                </div>
+                <div style="max-height:320px; overflow-y:auto;">
+                    <table class="data-table">
+                        <thead><tr><th>Jina</th><th>Bei</th><th>Stock</th><th>Hali</th><th></th></tr></thead>
+                        <tbody id="stock-body"></tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- Expenses -->
+            <div class="glass-panel">
+                <h3><i class="fas fa-receipt"></i> Matumizi (expense)</h3>
+                <div class="row-flex" style="margin-bottom:20px;">
+                    <input type="text" id="exp-desc" class="input-field" placeholder="Mf: Umeme, maji" style="flex:2;">
+                    <input type="number" id="exp-amount" class="input-field" placeholder="Kiasi" style="width:120px;">
+                    <button class="btn btn-red" onclick="addExpense()"><i class="fas fa-minus-circle"></i> Weka</button>
+                </div>
+                <div style="max-height:320px; overflow-y:auto;">
+                    <table class="data-table">
+                        <thead><tr><th>Tarehe</th><th>Maelezo</th><th>Kiasi</th><th></th></tr></thead>
+                        <tbody id="expense-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mauzo ya karibuni & reset -->
+        <div class="glass-panel" style="margin-top:30px;">
+            <h3><i class="fas fa-history"></i> Historia ya mauzo (10 za mwisho)</h3>
+            <div style="max-height:180px; overflow-y:auto;">
+                <table class="data-table">
+                    <thead><tr><th>Tarehe</th><th>Mteja</th><th>Kiasi</th></tr></thead>
+                    <tbody id="sales-body"></tbody>
+                </table>
+            </div>
+            <div style="display:flex; gap:12px; justify-content: flex-end; margin-top:15px;">
+                <button class="btn btn-outline-gold" onclick="resetSalesAndExpenses()"><i class="fas fa-undo-alt"></i> Futa mauzo/matumizi</button>
+                <button class="btn btn-red" onclick="resetAllData()"><i class="fas fa-exclamation-triangle"></i> Reset kamili</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ---------- DATA PERSISTENT ----------
+        const DEFAULT_PRODUCTS = [
+            { id: 101, name: "Dawa ya Nguvu (Jahazi)", price: 50000, stock: 20 },
+            { id: 102, name: "Dawa ya Vidonda vya Tumbo", price: 45000, stock: 15 },
+            { id: 103, name: "Dawa ya Uzazi", price: 60000, stock: 10 },
+            { id: 104, name: "Dawa ya Kisukari", price: 40000, stock: 25 },
+            { id: 105, name: "Consultation", price: 10000, stock: 9999 }
+        ];
+
+        // state
+        let products = [];
+        let sales = [];
+        let expenses = [];
+        let cart = [];         // each item: { id, name, price, qty, total }
+
+        // load or init
+        function loadData() {
+            try {
+                products = JSON.parse(localStorage.getItem('clinic_products')) || DEFAULT_PRODUCTS.map(p => ({ ...p }));
+                sales = JSON.parse(localStorage.getItem('clinic_sales')) || [];
+                expenses = JSON.parse(localStorage.getItem('clinic_expenses')) || [];
+            } catch (e) {
+                products = DEFAULT_PRODUCTS.map(p => ({ ...p }));
+                sales = []; expenses = [];
+            }
+            // ensure every product has id (backward compatibility)
+            products = products.map((p, idx) => p.id ? p : { ...p, id: Date.now() + idx });
+        }
+        loadData();
+
+        // ---------- HELPERS ----------
+        function saveProducts() { localStorage.setItem('clinic_products', JSON.stringify(products)); }
+        function saveSales() { localStorage.setItem('clinic_sales', JSON.stringify(sales)); }
+        function saveExpenses() { localStorage.setItem('clinic_expenses', JSON.stringify(expenses)); }
+
+        // ---------- AUTH ----------
+        window.login = function() {
+            const code = document.getElementById('passcode').value;
+            if(code === 'W004') {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                initUI();
+            } else {
+                document.getElementById('login-error').style.display = 'block';
+            }
+        };
+
+        window.logout = function() { location.reload(); };
+
+        // ---------- UI INIT ----------
+        function initUI() {
+            renderProductSelect();
+            renderAdmin();
+            // tarehe kwenye risiti
+            const today = new Date().toLocaleDateString('sw-TZ');
+            document.getElementById('r-date').innerText = 'Tarehe: ' + today;
+        }
+
+        // --- PRODUCT SELECT (billing) ---
+        function renderProductSelect() {
+            const select = document.getElementById('item-select');
+            select.innerHTML = '<option value="">-- chagua --</option>';
+            products.forEach(prod => {
+                select.innerHTML += `<option value="${prod.id}">${prod.name} - TZS ${prod.price.toLocaleString()} (stock: ${prod.stock})</option>`;
+            });
+        }
+
+        // --- CART OPERATIONS ---
+        window.addToCart = function() {
+            const prodId = document.getElementById('item-select').value;
+            const qty = parseInt(document.getElementById('item-qty').value, 10);
+            if (!prodId) return alert('Chagua dawa kwanza.');
+            if (isNaN(qty) || qty < 1) return alert('Weka idadi sahihi (1 au zaidi).');
+
+            const product = products.find(p => p.id == prodId);  // '==' because id from select is string
+            if (!product) return alert('Dawa haipatikani.');
+            if (product.stock < qty) return alert(`Stock haitoshi! Ipo ${product.stock} tu.`);
+
+            // check if item already in cart? allow duplicate entries, but we can also merge; better to merge.
+            const existing = cart.find(item => item.id == product.id);
+            if (existing) {
+                if (product.stock < existing.qty + qty) return alert('Haitoshi stock kwa kuongeza idadi.');
+                existing.qty += qty;
+                existing.total = existing.price * existing.qty;
+            } else {
+                cart.push({
+                    id: product.id,
+                    name: product.name,
+                    price: product.price,
+                    qty: qty,
+                    total: product.price * qty
+                });
+            }
+            renderCart();
+        };
+
+        function renderCart() {
+            const tbody = document.getElementById('cart-body');
+            tbody.innerHTML = '';
+            cart.forEach((item, idx) => {
+                tbody.innerHTML += `<tr>
+                    <td>${item.name}</td>
+                    <td>${item.qty}</td>
+                    <td class="price-col">${item.total.toLocaleString()}</td>
+                    <td><i class="fas fa-trash delete-icon" onclick="removeFromCart(${idx})"></i></td>
+                </tr>`;
+            });
+        }
+
+        window.removeFromCart = function(index) {
+            cart.splice(index, 1);
+            renderCart();
+        };
+
+        window.clearCart = function() {
+            if (cart.length && confirm('Futa orodha yote ya dawa?')) {
+                cart = [];
+                renderCart();
+            }
+        };
+
+        // generate preview (hazai hifadhi)
+        window.generateReceipt = function() {
+            const clientName = document.getElementById('client-name').value.trim();
+            if (!clientName) return alert('Tafadhali weka jina la mteja.');
+            if (cart.length === 0) return alert('Hakuna bidhaa kwenye orodha.');
+
+            document.getElementById('r-client').innerText = clientName;
+            // receipt number random au timestamp
+            document.getElementById('r-no').innerText = 'Namba: #R' + Math.floor(Math.random() * 100000);
+
+            const tbody = document.getElementById('r-items');
+            tbody.innerHTML = '';
+            let grand = 0;
+            cart.forEach(item => {
+                grand += item.total;
+                tbody.innerHTML += `<tr><td>${item.name} x${item.qty}</td><td>${item.price.toLocaleString()}</td><td class="price">${item.total.toLocaleString()}</td></tr>`;
+            });
+
+            document.getElementById('r-total').innerHTML = 'JUMLA KUU: TZS ' + grand.toLocaleString() + '/=';
+
+            // QR code
+            document.getElementById('qrcode').innerHTML = '';
+            new QRCode(document.getElementById('qrcode'), {
+                text: `Dr.William|${clientName}|${grand}|${Date.now()}`,
+                width: 90, height: 90
+            });
+        };
+
+        // save sale and deduct stock
+        window.saveToSystem = function() {
+            if (cart.length === 0) return alert('Hakuna bidhaa kwenye risiti.');
+
+            // total from cart
+            const totalAmount = cart.reduce((sum, i) => sum + i.total, 0);
+            const client = document.getElementById('client-name').value.trim();
+            if (!client) return alert('Jina la mteja halijajazwa.');
+
+            // check stock again (safety)
+            for (let item of cart) {
+                const prod = products.find(p => p.id == item.id);
+                if (!prod || prod.stock < item.qty) {
+                    alert(`Stock haitoshi kwa ${item.name}. Tafadhali angalia.`);
+                    return;
+                }
+            }
+
+            // deduct stock
+            for (let item of cart) {
+                const prod = products.find(p => p.id == item.id);
+                if (prod) prod.stock -= item.qty;
+            }
+
+            // record sale
+            sales.push({
+                id: Date.now(),
+                date: new Date().toLocaleDateString('sw-TZ'),
+                client: client,
+                amount: totalAmount
+            });
+
+            // persist
+            saveProducts();
+            saveSales();
+
+            // update admin panel
+            renderAdmin();
+            renderProductSelect();
+
+            // clear cart and input
+            cart = [];
+            document.getElementById('client-name').value = '';
+            renderCart();
+            // refresh receipt preview? (generate empty)
+            document.getElementById('r-client').innerText = '---';
+            document.getElementById('r-items').innerHTML = '';
+            document.getElementById('r-total').innerHTML = 'TZS 0';
+            document.getElementById('qrcode').innerHTML = '';
+            alert('Mauzo yamehifadhiwa na stock imepunguzwa.');
+        };
+
+        // ------ ADMIN FUNCTIONS ------
+        window.addProduct = function() {
+            const name = document.getElementById('new-prod-name').value.trim();
+            const price = parseFloat(document.getElementById('new-prod-price').value);
+            const qty = parseInt(document.getElementById('new-prod-qty').value, 10);
+
+            if (!name || isNaN(price) || price <= 0 || isNaN(qty) || qty < 0) {
+                return alert('Jaza jina, bei sahihi na idadi halali.');
+            }
+
+            const newProd = {
+                id: Date.now() + Math.floor(Math.random() * 1000),
+                name: name,
+                price: price,
+                stock: qty
+            };
+            products.push(newProd);
+            saveProducts();
+            renderProductSelect();
+            renderAdmin();
+            document.getElementById('new-prod-name').value = '';
+            document.getElementById('new-prod-price').value = '';
+            document.getElementById('new-prod-qty').value = '';
+        };
+
+        window.deleteProduct = function(prodId) {
+            if (!confirm('Una uhakika unataka kufuta dawa hii?')) return;
+            // remove from products
+            products = products.filter(p => p.id != prodId);
+            // also remove from cart if exists (avoid errors)
+            cart = cart.filter(item => item.id != prodId);
+            saveProducts();
+            renderProductSelect();
+            renderCart();
+            renderAdmin();
+        };
+
+        window.addExpense = function() {
+            const desc = document.getElementById('exp-desc').value.trim();
+            const amount = parseFloat(document.getElementById('exp-amount').value);
+            if (!desc || isNaN(amount) || amount <= 0) return alert('Weka maelezo na kiasi sahihi.');
+
+            expenses.push({
+                id: Date.now(),
+                date: new Date().toLocaleDateString('sw-TZ'),
+                desc: desc,
+                amount: amount
+            });
+            saveExpenses();
+            renderAdmin();
+            document.getElementById('exp-desc').value = '';
+            document.getElementById('exp-amount').value = '';
+        };
+
+        window.deleteExpense = function(expId) {
+            if (!confirm('Futa matumizi?')) return;
+            expenses = expenses.filter(e => e.id != expId);
+            saveExpenses();
+            renderAdmin();
+        };
+
+        function renderAdmin() {
+            // stock table
+            const stockBody = document.getElementById('stock-body');
+            stockBody.innerHTML = '';
+            products.forEach(p => {
+                const status = p.stock < 5 ? '<span class="badge-low">chini</span>' : '<span class="badge-ok">nzuri</span>';
+                stockBody.innerHTML += `<tr>
+                    <td>${p.name}</td><td>${p.price.toLocaleString()}</td><td>${p.stock}</td><td>${status}</td>
+                    <td><i class="fas fa-trash action-icon" onclick="deleteProduct(${p.id})"></i></td>
+                </tr>`;
+            });
+
+            // expenses table
+            const expBody = document.getElementById('expense-body');
+            expBody.innerHTML = '';
+            expenses.slice().reverse().forEach(e => {
+                expBody.innerHTML += `<tr>
+                    <td>${e.date}</td><td>${e.desc}</td><td style="color:#e74c3c;">-${e.amount.toLocaleString()}</td>
+                    <td><i class="fas fa-times action-icon" onclick="deleteExpense(${e.id})"></i></td>
+                </tr>`;
+            });
+
+            // sales history (10 most recent)
+            const salesBody = document.getElementById('sales-body');
+            salesBody.innerHTML = '';
+            sales.slice(-10).reverse().forEach(s => {
+                salesBody.innerHTML += `<tr><td>${s.date}</td><td>${s.client}</td><td style="color:#2ecc71;">+${s.amount.toLocaleString()}</td></tr>`;
+            });
+
+            // update stats
+            const totalIncome = sales.reduce((acc, s) => acc + s.amount, 0);
+            const totalExpense = expenses.reduce((acc, e) => acc + e.amount, 0);
+            document.getElementById('stat-income').innerText = totalIncome.toLocaleString();
+            document.getElementById('stat-expense').innerText = totalExpense.toLocaleString();
+            document.getElementById('stat-balance').innerText = (totalIncome - totalExpense).toLocaleString();
+        }
+
+        // reset partial
+        window.resetSalesAndExpenses = function() {
+            if (confirm('Futa historia yote ya mauzo na matumizi? (stock itabaki)')) {
+                sales = [];
+                expenses = [];
+                saveSales();
+                saveExpenses();
+                renderAdmin();
+            }
+        };
+
+        window.resetAllData = function() {
+            if (confirm('ONYO KUU: Hii itafuta data zote na kurudisha mfano wa awali. Endelea?')) {
+                localStorage.clear();
+                location.reload();
+            }
+        };
+
+        // ------ DOWNLOAD ACTIONS ------
+        window.downloadImage = function() {
+            const element = document.getElementById('receipt-preview');
+            html2canvas(element, { scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'risiti_drwilliam_' + Date.now() + '.jpg';
+                link.href = canvas.toDataURL('image/jpeg');
+                link.click();
+            });
+        };
+
+        window.downloadPDF = function() {
+            const element = document.getElementById('receipt-preview');
+            html2canvas(element, { scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const imgProps = pdf.getImageProperties(imgData);
+                const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                pdf.addImage(imgData, 'PNG', 0, 8, pdfWidth, imgHeight);
+                pdf.save('risiti_drwilliam_' + Date.now() + '.pdf');
+            });
+        };
+
+        // ------ TAB SWITCH ------
+        window.switchTab = function(tab) {
+            const billingDiv = document.getElementById('view-billing');
+            const adminDiv = document.getElementById('view-admin');
+            const btnBill = document.getElementById('tab-billing-btn');
+            const btnAdmin = document.getElementById('tab-admin-btn');
+
+            if (tab === 'billing') {
+                billingDiv.style.display = 'block';
+                adminDiv.style.display = 'none';
+                btnBill.classList.add('active');
+                btnAdmin.classList.remove('active');
+            } else {
+                billingDiv.style.display = 'none';
+                adminDiv.style.display = 'block';
+                btnBill.classList.remove('active');
+                btnAdmin.classList.add('active');
+                renderAdmin(); // refresh data
+            }
+        };
+
+        // attach to window for onclick access
+        window.renderAdmin = renderAdmin;
+        window.renderProductSelect = renderProductSelect;
+        window.deleteProduct = deleteProduct;
+        window.deleteExpense = deleteExpense;
+
+        // ensure init after login
+        window.initUI = initUI;
+    })();
+</script>
+
+<!-- footer note: system imarishwa -->
+</body>
+</html>
