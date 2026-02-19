@@ -97,7 +97,7 @@
         .btn-red:hover { background: #c0392b; transform: scale(1.02); }
         .btn-blue { background: var(--blue); color: white; }
         .btn-blue:hover { background: #2980b9; transform: scale(1.02); }
-        .btn-green { background: var(--green); color: white; }  /* now defined */
+        .btn-green { background: var(--green); color: white; }
         .btn-green:hover { background: #27ae60; transform: scale(1.02); }
         .btn-outline-gold {
             background: transparent; border: 1.5px solid var(--gold); color: var(--gold);
@@ -163,11 +163,46 @@
             background: white; color: black; padding: 35px 25px; font-family: 'Courier New', monospace;
             max-width: 480px; margin: 0 auto; border-radius: 16px; box-shadow: 0 12px 35px rgba(212,175,55,0.3);
             border: 2px solid var(--gold);
+            position: relative;
         }
         .rec-header { text-align: center; border-bottom: 2px dashed #222; padding-bottom: 12px; margin-bottom: 18px; }
         .rec-logo { width: 75px; height: 75px; object-fit: contain; filter: drop-shadow(2px 4px 4px rgba(0,0,0,0.2)); }
         .rec-meta { display: flex; justify-content: space-between; font-size: 0.85rem; margin: 12px 0; }
         .rec-total { text-align: right; font-weight: 800; font-size: 1.3rem; border-top: 2px solid; border-bottom: 2px solid; padding: 10px 0; margin: 15px 0; }
+
+        /* stamp za malipo */
+        .stamp-container {
+            text-align: center;
+            margin: 15px 0 5px;
+        }
+        .paid-stamp {
+            background-color: #3498db;
+            color: white;
+            font-weight: 800;
+            padding: 8px 25px;
+            border-radius: 40px;
+            display: inline-block;
+            border: 3px solid white;
+            box-shadow: 0 0 0 3px #3498db;
+            transform: rotate(-3deg);
+            font-size: 1.4rem;
+            letter-spacing: 2px;
+            font-family: 'Poppins', sans-serif;
+        }
+        .unpaid-stamp {
+            background-color: #e74c3c;
+            color: white;
+            font-weight: 800;
+            padding: 8px 25px;
+            border-radius: 40px;
+            display: inline-block;
+            border: 3px solid white;
+            box-shadow: 0 0 0 3px #e74c3c;
+            transform: rotate(-3deg);
+            font-size: 1.4rem;
+            letter-spacing: 2px;
+            font-family: 'Poppins', sans-serif;
+        }
 
         .badge-low { background: rgba(231,76,60,0.25); color: #ff8a7a; padding: 2px 8px; border-radius: 30px; font-size: 0.7rem; font-weight: 600; }
         .badge-ok { background: rgba(46,204,113,0.2); color: #86e69d; }
@@ -185,6 +220,24 @@
 
         .action-icon { cursor: pointer; margin: 0 4px; color: #aaa; transition: 0.1s; }
         .action-icon:hover { color: var(--gold); }
+
+        /* chip za hali kwenye historia */
+        .chip-paid {
+            background: #2ecc71;
+            color: black;
+            padding: 3px 12px;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+        .chip-unpaid {
+            background: #e74c3c;
+            color: white;
+            padding: 3px 12px;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
 
         @media (max-width: 600px) {
             .navbar { border-radius: 20px; padding: 15px; flex-direction: column; gap: 12px; }
@@ -236,6 +289,19 @@
                     </div>
                 </div>
                 
+                <!-- Hali ya malipo (PAID / UNPAID) -->
+                <div class="input-group">
+                    <label>Hali ya malipo:</label>
+                    <div style="display: flex; gap: 25px; align-items: center; background: #1a1f30; padding: 10px 15px; border-radius: 40px;">
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="radio" name="paymentStatus" value="paid" checked> <span style="color:#2ecc71;"><i class="fas fa-check-circle"></i> Imelipwa</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="radio" name="paymentStatus" value="unpaid"> <span style="color:#e74c3c;"><i class="fas fa-times-circle"></i> Haijalipwa</span>
+                        </label>
+                    </div>
+                </div>
+
                 <!-- Cart (orodha ya dawa) -->
                 <div style="background: #0f1420; border-radius: 24px; padding: 1rem; margin: 20px 0;">
                     <table class="mini-table">
@@ -265,7 +331,7 @@
                             <span id="r-date">Tarehe: DD/MM/YYYY</span>
                             <span id="r-no">Namba: #0000</span>
                         </div>
-                        <div style="margin:10px 0 12px; font-size:0.95rem; border-left:3px solid gold; padding-left:8px;">
+                        <div style="margin:10px 0 12px; border-left:3px solid gold; padding-left:8px;">
                             <strong>Mteja:</strong> <span id="r-client">---</span>
                         </div>
                         <table class="rec-table" style="width:100%;">
@@ -273,6 +339,12 @@
                             <tbody id="r-items"></tbody>
                         </table>
                         <div class="rec-total" id="r-total">TZS 0</div>
+                        
+                        <!-- SEHEMU YA STAMP (PAID/UNPAID) -->
+                        <div id="stamp-container" class="stamp-container">
+                            <!-- Stamp itaingizwa na JavaScript -->
+                        </div>
+
                         <div id="qrcode" style="display:flex; justify-content:center; margin:15px 0;"></div>
                         <div class="rec-footer" style="text-align:center; font-size:0.7rem; margin-top:10px;">Asante · Afya bora kila siku</div>
                     </div>
@@ -331,12 +403,12 @@
             </div>
         </div>
         
-        <!-- Mauzo ya karibuni & reset -->
+        <!-- Mauzo ya karibuni & reset (sasa ina hali ya malipo) -->
         <div class="glass-panel" style="margin-top:30px;">
             <h3><i class="fas fa-history"></i> Historia ya mauzo (10 za mwisho)</h3>
-            <div style="max-height:180px; overflow-y:auto;">
+            <div style="max-height:200px; overflow-y:auto;">
                 <table class="data-table">
-                    <thead><tr><th>Tarehe</th><th>Mteja</th><th>Kiasi</th></tr></thead>
+                    <thead><tr><th>Tarehe</th><th>Mteja</th><th>Kiasi</th><th>Hali</th></tr></thead>
                     <tbody id="sales-body"></tbody>
                 </table>
             </div>
@@ -375,7 +447,6 @@
                 products = DEFAULT_PRODUCTS.map(p => ({ ...p }));
                 sales = []; expenses = [];
             }
-            // ensure every product has id (backward compatibility)
             products = products.map((p, idx) => p.id ? p : { ...p, id: Date.now() + idx });
         }
         loadData();
@@ -403,7 +474,6 @@
         function initUI() {
             renderProductSelect();
             renderAdmin();
-            // tarehe kwenye risiti
             const today = new Date().toLocaleDateString('sw-TZ');
             document.getElementById('r-date').innerText = 'Tarehe: ' + today;
         }
@@ -424,11 +494,10 @@
             if (!prodId) return alert('Chagua dawa kwanza.');
             if (isNaN(qty) || qty < 1) return alert('Weka idadi sahihi (1 au zaidi).');
 
-            const product = products.find(p => p.id == prodId);  // '==' because id from select is string
+            const product = products.find(p => p.id == prodId);
             if (!product) return alert('Dawa haipatikani.');
             if (product.stock < qty) return alert(`Stock haitoshi! Ipo ${product.stock} tu.`);
 
-            // check if item already in cart? allow duplicate entries, but we can also merge; better to merge.
             const existing = cart.find(item => item.id == product.id);
             if (existing) {
                 if (product.stock < existing.qty + qty) return alert('Haitoshi stock kwa kuongeza idadi.');
@@ -471,14 +540,13 @@
             }
         };
 
-        // generate preview (hazai hifadhi)
+        // generate preview (hazai hifadhi) - sasa inajumuisha stamp ya malipo
         window.generateReceipt = function() {
             const clientName = document.getElementById('client-name').value.trim();
             if (!clientName) return alert('Tafadhali weka jina la mteja.');
             if (cart.length === 0) return alert('Hakuna bidhaa kwenye orodha.');
 
             document.getElementById('r-client').innerText = clientName;
-            // receipt number random au timestamp
             document.getElementById('r-no').innerText = 'Namba: #R' + Math.floor(Math.random() * 100000);
 
             const tbody = document.getElementById('r-items');
@@ -491,10 +559,19 @@
 
             document.getElementById('r-total').innerHTML = 'JUMLA KUU: TZS ' + grand.toLocaleString() + '/=';
 
+            // Stamp kulingana na hali ya malipo
+            const statusPaid = document.querySelector('input[name="paymentStatus"]:checked').value === 'paid';
+            const stampDiv = document.getElementById('stamp-container');
+            if (statusPaid) {
+                stampDiv.innerHTML = '<div class="paid-stamp"><i class="fas fa-check-circle"></i> IMELIPWA</div>';
+            } else {
+                stampDiv.innerHTML = '<div class="unpaid-stamp"><i class="fas fa-times-circle"></i> HAIJALIPWA</div>';
+            }
+
             // QR code
             document.getElementById('qrcode').innerHTML = '';
-            new QRCode(document.getElementById('qrcode'), {
-                text: `Dr.William|${clientName}|${grand}|${Date.now()}`,
+            new QRCode(document.getElementById("qrcode"), {
+                text: `Dr.William|${clientName}|${grand}|${statusPaid ? 'Paid' : 'Unpaid'}|${Date.now()}`,
                 width: 90, height: 90
             });
         };
@@ -503,12 +580,11 @@
         window.saveToSystem = function() {
             if (cart.length === 0) return alert('Hakuna bidhaa kwenye risiti.');
 
-            // total from cart
             const totalAmount = cart.reduce((sum, i) => sum + i.total, 0);
             const client = document.getElementById('client-name').value.trim();
             if (!client) return alert('Jina la mteja halijajazwa.');
 
-            // check stock again (safety)
+            // check stock again
             for (let item of cart) {
                 const prod = products.find(p => p.id == item.id);
                 if (!prod || prod.stock < item.qty) {
@@ -523,19 +599,21 @@
                 if (prod) prod.stock -= item.qty;
             }
 
+            // determine payment status
+            const isPaid = document.querySelector('input[name="paymentStatus"]:checked').value === 'paid';
+
             // record sale
             sales.push({
                 id: Date.now(),
                 date: new Date().toLocaleDateString('sw-TZ'),
                 client: client,
-                amount: totalAmount
+                amount: totalAmount,
+                paid: isPaid   // <-- sasa tunahifadhi hali
             });
 
-            // persist
             saveProducts();
             saveSales();
 
-            // update admin panel
             renderAdmin();
             renderProductSelect();
 
@@ -543,10 +621,11 @@
             cart = [];
             document.getElementById('client-name').value = '';
             renderCart();
-            // refresh receipt preview? (generate empty)
+            // reset receipt preview
             document.getElementById('r-client').innerText = '---';
             document.getElementById('r-items').innerHTML = '';
             document.getElementById('r-total').innerHTML = 'TZS 0';
+            document.getElementById('stamp-container').innerHTML = '';
             document.getElementById('qrcode').innerHTML = '';
             alert('Mauzo yamehifadhiwa na stock imepunguzwa.');
         };
@@ -578,9 +657,7 @@
 
         window.deleteProduct = function(prodId) {
             if (!confirm('Una uhakika unataka kufuta dawa hii?')) return;
-            // remove from products
             products = products.filter(p => p.id != prodId);
-            // also remove from cart if exists (avoid errors)
             cart = cart.filter(item => item.id != prodId);
             saveProducts();
             renderProductSelect();
@@ -634,14 +711,20 @@
                 </tr>`;
             });
 
-            // sales history (10 most recent)
+            // sales history (10 most recent) + status
             const salesBody = document.getElementById('sales-body');
             salesBody.innerHTML = '';
             sales.slice(-10).reverse().forEach(s => {
-                salesBody.innerHTML += `<tr><td>${s.date}</td><td>${s.client}</td><td style="color:#2ecc71;">+${s.amount.toLocaleString()}</td></tr>`;
+                const paidChip = s.paid ? '<span class="chip-paid"><i class="fas fa-check"></i> Imelipwa</span>' : '<span class="chip-unpaid"><i class="fas fa-times"></i> Haijalipwa</span>';
+                salesBody.innerHTML += `<tr>
+                    <td>${s.date}</td>
+                    <td>${s.client}</td>
+                    <td style="color:#2ecc71;">+${s.amount.toLocaleString()}</td>
+                    <td>${paidChip}</td>
+                </tr>`;
             });
 
-            // update stats
+            // stats
             const totalIncome = sales.reduce((acc, s) => acc + s.amount, 0);
             const totalExpense = expenses.reduce((acc, e) => acc + e.amount, 0);
             document.getElementById('stat-income').innerText = totalIncome.toLocaleString();
@@ -649,7 +732,6 @@
             document.getElementById('stat-balance').innerText = (totalIncome - totalExpense).toLocaleString();
         }
 
-        // reset partial
         window.resetSalesAndExpenses = function() {
             if (confirm('Futa historia yote ya mauzo na matumizi? (stock itabaki)')) {
                 sales = [];
@@ -709,21 +791,18 @@
                 adminDiv.style.display = 'block';
                 btnBill.classList.remove('active');
                 btnAdmin.classList.add('active');
-                renderAdmin(); // refresh data
+                renderAdmin();
             }
         };
 
-        // attach to window for onclick access
         window.renderAdmin = renderAdmin;
         window.renderProductSelect = renderProductSelect;
         window.deleteProduct = deleteProduct;
         window.deleteExpense = deleteExpense;
-
-        // ensure init after login
         window.initUI = initUI;
     })();
 </script>
 
-<!-- footer note: system imarishwa -->
+<!-- footer note: system imarishwa na stamp ya malipo -->
 </body>
 </html>
